@@ -1,5 +1,7 @@
 <?php
 require_once 'db.php';
+// صدا زدن تابع و گرفتن اتصال
+$pdo = getDBConnection();
 $stmt = $pdo->query("SELECT * FROM products");
 $products = $stmt->fetchAll();
 ?>
@@ -17,6 +19,24 @@ $products = $stmt->fetchAll();
     .card-title { color: #212529; font-weight: bold; }
     .footer { background: #212529; color: white; padding: 20px 0; text-align: center; }
     .navbar-brand { font-weight: bold; font-size: 22px; }
+    .card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-img-top {
+  height: 250px;
+  object-fit: cover;
+}
+
+.card-body {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
   </style>
 </head>
 <body>
@@ -24,31 +44,23 @@ $products = $stmt->fetchAll();
 <!-- نوار بالای سایت -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container">
-    <a class="navbar-brand" href="#">🧥 فروشگاه لباس</a>
+    <a class="navbar-brand" href="#">🧥 فروشگاه لباس مدرن</a>
     <div>
-      <a class="btn btn-outline-light ms-2" href="register.php">ثبت‌نام</a>
-      <a class="btn btn-outline-light" href="login.php">ورود</a>
+      <a class="btn btn-outline-light ms-2" href="register.html">ثبت‌نام</a>
+      <a class="btn btn-outline-light" href="login.html">ورود</a>
+      <a class="btn btn-outline-light" href="galary.php">گالری</a>
     </div>
   </div>
 </nav>
 
 <!-- اسلایدر -->
-<div id="carouselExample" class="carousel slide" data-bs-ride="carousel">
-  <div class="carousel-inner">
-    <div class="carousel-item active">
-      <img src="assets/banner1.jpg" class="d-block w-100" alt="مد روز">
-    </div>
-    <div class="carousel-item">
-      <img src="assets/banner2.jpg" class="d-block w-100" alt="لباس مردانه">
-    </div>
-  </div>
-  <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
-    <span class="carousel-control-prev-icon"></span>
-  </button>
-  <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
-    <span class="carousel-control-next-icon"></span>
-  </button>
+<div class="container-fluid px-0">
+  <video class="w-100" autoplay muted loop playsinline>
+    <source src="assets/ا.mp4" type="video/mp4">
+    مرورگر شما از پخش ویدیو پشتیبانی نمی‌کند.
+  </video>
 </div>
+
 
 <!-- محصولات -->
 <div class="container mt-5">
