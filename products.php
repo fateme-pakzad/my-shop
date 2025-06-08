@@ -1,35 +1,38 @@
 <?php
 session_start();
+require_once 'db.php'; // اتصال به دیتابیس با PDO
 
-// بررسی لاگین و ادمین بودن
 if (!isset($_SESSION['username']) || $_SESSION['admin'] != 1) {
-    // اگر لاگین نکرده یا مدیر نیست، به صفحه ورود هدایت شود
     header("Location: index.php");
     exit();
 }
 
-// اگر دکمه خروج زده شد
 if (isset($_POST['logout'])) {
-    // نابود کردن تمام سشن‌ها
     session_unset();
     session_destroy();
-
-    // هدایت به صفحه ورود
     header("Location: index.php");
     exit();
 }
 
-$conn = new mysqli("localhost", "root", "", "clothing_db");
-$result = $conn->query("SELECT * FROM products");
+$pdo = getDBConnection();
 
+// دریافت همه محصولات
+try {
+    $stmt = $pdo->query("SELECT * FROM products");
+    $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    die("خطا در دریافت محصولات: " . $e->getMessage());
+}
+
+// بررسی وضعیت ویرایش
 $edit_data = null;
 if (isset($_GET['edit'])) {
-  $edit_id = (int)$_GET['edit']; // امن‌تر کردن ورودی
-  $edit_res = $conn->query("SELECT * FROM products WHERE id = $edit_id");
-  $edit_data = $edit_res->fetch_assoc();
+    $edit_id = (int)$_GET['edit'];
+    $stmt = $pdo->prepare("SELECT * FROM products WHERE id = ?");
+    $stmt->execute([$edit_id]);
+    $edit_data = $stmt->fetch(PDO::FETCH_ASSOC);
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="fa">
 <head>
@@ -80,7 +83,6 @@ if (isset($_GET['edit'])) {
       box-shadow: 0 0 5px rgba(0,0,0,0.1);
     }
 
-    /* استایل دکمه خروج */
     .logout-btn {
       position: fixed;
       top: 20px;
@@ -90,7 +92,7 @@ if (isset($_GET['edit'])) {
 </head>
 <body>
 
-<!-- نوار بالا (navbar) -->
+<!-- نوار بالا -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary px-4 mb-4">
   <div class="container-fluid">
     <span class="navbar-brand">پنل مدیریت</span>
@@ -107,7 +109,6 @@ if (isset($_GET['edit'])) {
   <div class="card p-4 bg-white">
     <h3 class="text-center mb-4">پنل مدیریت محصولات</h3>
 
-    <!-- فرم محصول -->
     <form action="save_product.php" method="POST">
       <input type="hidden" name="id" value="<?= htmlspecialchars($edit_data['id'] ?? '') ?>">
       <div class="row g-3">
@@ -124,7 +125,7 @@ if (isset($_GET['edit'])) {
           <input type="text" class="form-control" name="description" value="<?= htmlspecialchars($edit_data['description'] ?? '') ?>">
         </div>
         <div class="col-md-6">
-          <label class="form-label">نام فایل تصویر (مثلاً product.jpg)</label>
+          <label class="form-label">نام فایل تصویر</label>
           <input type="text" class="form-control" name="image" value="<?= htmlspecialchars($edit_data['image'] ?? '') ?>">
         </div>
         <div class="col-12">
@@ -133,7 +134,6 @@ if (isset($_GET['edit'])) {
       </div>
     </form>
 
-    <!-- جدول -->
     <hr class="my-4">
     <div class="table-responsive">
       <table class="table table-bordered text-center align-middle bg-light">
@@ -148,7 +148,7 @@ if (isset($_GET['edit'])) {
           </tr>
         </thead>
         <tbody>
-          <?php while ($row = $result->fetch_assoc()): ?>
+          <?php foreach ($products as $row): ?>
             <tr>
               <td><?= htmlspecialchars($row['id']) ?></td>
               <td><?= htmlspecialchars($row['name']) ?></td>
@@ -160,12 +160,11 @@ if (isset($_GET['edit'])) {
                 <a href="save_product.php?delete=<?= htmlspecialchars($row['id']) ?>" class="btn btn-sm btn-danger" onclick="return confirm('آیا مطمئن هستید؟')">حذف</a>
               </td>
             </tr>
-          <?php endwhile; ?>
+          <?php endforeach; ?>
         </tbody>
       </table>
     </div>
   </div>
 </div>
-
 </body>
 </html>
